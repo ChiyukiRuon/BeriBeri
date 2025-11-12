@@ -71,6 +71,7 @@ settings:
   group_languages_and_fonts: 語言與字型
   group_link_opening_behavior: 連結開啓行爲
   group_video_card: 影片卡片
+  group_phone_push: 手機推送
   group_performance: 毛玻璃與效能
   group_topbar: 頂欄
   group_dock: Dock
@@ -150,6 +151,22 @@ settings:
   enable_video_preview: 啓用影片預覽功能（如果可以的話）
   enable_video_ctrl_bar_on_video_card: 在影片卡片上顯示影片控制欄
   hover_video_card_delayed: 將滑鼠懸停在影片卡片上時延遲影片預覽
+
+  phone_push_api_url: 推送 API 位址
+  phone_push_api_url_desc: 透過此位址將目前的影片連結傳送到手機。
+  phone_push_api_url_placeholder: 例如 https://api.example.com/push
+  phone_push_api_method: 請求方法
+  phone_push_api_method_opt:
+    post: POST
+    get: GET
+  phone_push_api_headers: 自訂請求標頭
+  phone_push_api_headers_desc: 輸入一個 JSON 物件，支援使用與下方相同的佔位符。
+  phone_push_api_headers_placeholder: ''
+  phone_push_api_payload_template: 請求體模板
+  phone_push_api_payload_template_desc: |-
+    支援的佔位符：{url}、{title}、{cover}、{author}、{bvid}、{aid}。
+    可使用 {urlEncoded}、{titleEncoded}、{coverEncoded}、{authorEncoded} 取得 URL 編碼結果，使用 {urlJson}、{titleJson}、{coverJson}、{authorJson} 取得 JSON 字串形式。
+  phone_push_api_payload_template_placeholder: ''
 
   # Desktop and Dock
   use_old_top_bar: 使用舊版頂欄
@@ -417,6 +434,12 @@ video_card:
     copy_video_link: 複製影片連結
     copy_bv_number: 複製 BV 號
     copy_av_number: 複製 AV 號
+
+    push_to_phone: 推送到手機
+    push_to_phone_success: 已推送到手機
+    push_to_phone_failed: 推送失敗，請稍後再試
+    push_to_phone_missing_config: 請先在設定中配置推送 API
+    push_to_phone_invalid_headers: 自訂請求標頭不是有效的 JSON 物件
 
     view_the_original_cover: 檢視封面
 

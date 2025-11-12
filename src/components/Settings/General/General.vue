@@ -80,6 +80,19 @@ const fontPreferenceOptions = computed(() => {
   ]
 })
 
+const phonePushApiMethodOptions = computed(() => {
+  return [
+    {
+      label: t('settings.phone_push_api_method_opt.post'),
+      value: 'POST',
+    },
+    {
+      label: t('settings.phone_push_api_method_opt.get'),
+      value: 'GET',
+    },
+  ]
+})
+
 watch(() => settings.value.language, (newValue) => {
   locale.value = newValue
 })
@@ -191,8 +204,68 @@ watch(() => settings.value.language, (newValue) => {
         </SettingsItem>
       </template>
     </SettingsItemGroup>
+
+    <SettingsItemGroup :title="$t('settings.group_phone_push')">
+      <SettingsItem :title="$t('settings.phone_push_api_url')" :desc="$t('settings.phone_push_api_url_desc')">
+        <Input
+          v-model="settings.phonePushApiUrl"
+          :placeholder="$t('settings.phone_push_api_url_placeholder')"
+          @keydown.stop.passive="() => {}"
+        />
+      </SettingsItem>
+      <SettingsItem :title="$t('settings.phone_push_api_method')">
+        <Select
+          v-model="settings.phonePushApiMethod"
+          :options="phonePushApiMethodOptions"
+          w="full"
+        />
+      </SettingsItem>
+      <SettingsItem :title="$t('settings.phone_push_api_headers')" :desc="$t('settings.phone_push_api_headers_desc')">
+        <textarea
+          v-model="settings.phonePushApiHeaders"
+          class="bew-settings-textarea bew-settings-textarea--compact"
+          rows="3"
+          :placeholder="$t('settings.phone_push_api_headers_placeholder')"
+          @keydown.stop
+        />
+      </SettingsItem>
+      <SettingsItem :title="$t('settings.phone_push_api_payload_template')" :desc="$t('settings.phone_push_api_payload_template_desc', { url: '{url}', title: '{title}', cover: '{cover}', author: '{author}', bvid: '{bvid}', aid: '{aid}', urlEncoded: '{urlEncoded}', titleEncoded: '{titleEncoded}', coverEncoded: '{coverEncoded}', authorEncoded: '{authorEncoded}', urlJson: '{urlJson}', titleJson: '{titleJson}', coverJson: '{coverJson}', authorJson: '{author}' })">
+        <textarea
+          v-model="settings.phonePushApiPayloadTemplate"
+          class="bew-settings-textarea"
+          rows="5"
+          :placeholder="$t('settings.phone_push_api_payload_template_placeholder')"
+          @keydown.stop
+        />
+      </SettingsItem>
+    </SettingsItemGroup>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.bew-settings-textarea {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: var(--bew-radius);
+  border: 1px solid var(--bew-border-color);
+  background-color: var(--bew-fill-1);
+  color: var(--bew-text-color-1);
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  resize: vertical;
+  min-height: 120px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.bew-settings-textarea--compact {
+  min-height: 80px;
+}
+
+.bew-settings-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bew-theme-color);
+  border-color: var(--bew-theme-color);
+}
 </style>

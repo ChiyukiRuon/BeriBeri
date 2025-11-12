@@ -71,6 +71,7 @@ settings:
   group_languages_and_fonts: 语言和字体
   group_link_opening_behavior: 链接打开行为
   group_video_card: 视频卡片
+  group_phone_push: 手机推送
   group_performance: 毛玻璃和性能
   group_topbar: 顶栏
   group_dock: Dock 栏
@@ -150,6 +151,22 @@ settings:
   enable_video_preview: 启用视频预览功能（如果可以的话）
   enable_video_ctrl_bar_on_video_card: 在视频卡片上显示视频控制栏
   hover_video_card_delayed: 将鼠标悬停在视频卡片上时延迟视频预览
+
+  phone_push_api_url: 推送 API 地址
+  phone_push_api_url_desc: 通过该地址将当前视频链接发送到手机。
+  phone_push_api_url_placeholder: 例如 https://api.example.com/push
+  phone_push_api_method: 请求方法
+  phone_push_api_method_opt:
+    post: POST
+    get: GET
+  phone_push_api_headers: 自定义请求头
+  phone_push_api_headers_desc: 输入一个 JSON 对象，支持使用与下方相同的占位符。
+  phone_push_api_headers_placeholder: ''
+  phone_push_api_payload_template: 请求体模板
+  phone_push_api_payload_template_desc: |
+    支持的占位符：{url}、{title}、{cover}、{author}、{bvid}、{aid}。
+    可使用 {urlEncoded}、{titleEncoded}、{coverEncoded}、{authorEncoded} 获取 URL 编码结果，使用 {urlJson}、{titleJson}、{coverJson}、{authorJson} 获取 JSON 字符串形式。
+  phone_push_api_payload_template_placeholder: ''
 
   # Desktop & Dock
   use_old_top_bar: 使用旧版顶栏
@@ -416,6 +433,12 @@ video_card:
     copy_video_link: 复制视频链接
     copy_bv_number: 复制 BV 号
     copy_av_number: 复制 AV 号
+
+    push_to_phone: 推送到手机
+    push_to_phone_success: 已推送到手机
+    push_to_phone_failed: 推送失败，请稍后再试
+    push_to_phone_missing_config: 请先在设置中配置推送 API
+    push_to_phone_invalid_headers: 自定义请求头不是有效的 JSON 对象
 
     view_the_original_cover: 查看封面
 

@@ -3,6 +3,7 @@ import type { CSSProperties } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useBewlyApp } from '~/composables/useAppProvider'
+import { settings } from '~/logic'
 import { Type as ThreePointV2Type } from '~/models/video/appForYou'
 import { openLinkToNewTab } from '~/utils/main'
 import { openLinkInBackground } from '~/utils/tabs'
@@ -31,6 +32,7 @@ const { t } = useI18n()
 const showContextMenu = ref<boolean>(false)
 const showDislikeDialog = ref<boolean>(false)
 const showPipWindow = ref<boolean>(false)
+const isPushingToPhone = ref<boolean>(false)
 const { openIframeDrawer } = useBewlyApp()
 
 enum VideoOption {
@@ -39,6 +41,8 @@ enum VideoOption {
   OpenInCurrentTab,
   OpenInNewWindow,
   OpenInDrawer,
+
+  PushToPhone,
 
   ViewTheOriginalCover,
   ViewThisUserChannel,
@@ -59,6 +63,7 @@ const commonOptions = computed((): { command: VideoOption, name: string, icon: s
     ],
 
     [
+      { command: VideoOption.PushToPhone, name: t('video_card.operation.push_to_phone'), icon: 'i-solar:smartphone-2-bold-duotone' },
       { command: VideoOption.CopyVideoLink, name: t('video_card.operation.copy_video_link'), icon: 'i-solar:copy-bold-duotone' },
       { command: VideoOption.CopyBVNumber, name: t('video_card.operation.copy_bv_number'), icon: 'i-solar:copy-bold-duotone' },
       { command: VideoOption.CopyAVNumber, name: t('video_card.operation.copy_av_number'), icon: 'i-solar:copy-bold-duotone' },
@@ -96,7 +101,7 @@ function handleAppMoreCommand(command: ThreePointV2Type) {
   }
 }
 
-function handleCommonCommand(command: VideoOption) {
+async function handleCommonCommand(command: VideoOption) {
   switch (command) {
     case VideoOption.OpenInNewTab:
       openLinkToNewTab(props.video.url!)
@@ -118,6 +123,10 @@ function handleCommonCommand(command: VideoOption) {
       handleClose()
       break
 
+    case VideoOption.PushToPhone:
+      await pushVideoLinkToPhone()
+      break
+
     case VideoOption.CopyVideoLink:
       navigator.clipboard.writeText(props.video.url!)
       handleClose()
@@ -135,6 +144,142 @@ function handleCommonCommand(command: VideoOption) {
       window.open(props.video.cover, '_blank')
       handleClose()
       break
+  }
+}
+
+function resolveVideoUrl(video: Video): string {
+  if (video.url)
+    return video.url
+  if (video.bvid)
+    return `https://www.bilibili.com/video/${video.bvid}`
+  const aid = video.aid ?? video.id
+  if (aid)
+    return `https://www.bilibili.com/video/av${aid}`
+  return ''
+}
+
+function getAuthorNames(video: Video): string {
+  if (!video.author)
+    return ''
+  if (Array.isArray(video.author))
+    return video.author.map(author => author?.name ?? '').filter(Boolean).join(', ')
+  return video.author.name ?? ''
+}
+
+function buildTemplateContext(videoUrl: string): Record<string, string> {
+  const title = props.video.title ?? ''
+  const cover = props.video.cover ?? ''
+  const author = getAuthorNames(props.video)
+  const aid = props.video.aid ?? props.video.id
+
+  return {
+    url: videoUrl,
+    urlEncoded: encodeURIComponent(videoUrl),
+    urlJson: JSON.stringify(videoUrl),
+    title,
+    titleEncoded: encodeURIComponent(title),
+    titleJson: JSON.stringify(title),
+    cover,
+    coverEncoded: encodeURIComponent(cover),
+    coverJson: JSON.stringify(cover),
+    author,
+    authorEncoded: encodeURIComponent(author),
+    authorJson: JSON.stringify(author),
+    bvid: props.video.bvid ?? '',
+    aid: aid ? aid.toString() : '',
+  }
+}
+
+function applyTemplate(template: string, context: Record<string, string>) {
+  return Object.entries(context).reduce((result, [key, value]) => {
+    return result.replaceAll(`{${key}}`, value ?? '')
+  }, template)
+}
+
+function buildHeaders(rawHeaders: string | undefined, context: Record<string, string>): Record<string, string> | null {
+  if (!rawHeaders?.trim())
+    return {}
+  try {
+    const parsed = JSON.parse(rawHeaders) as Record<string, unknown>
+    const headers: Record<string, string> = {}
+    Object.entries(parsed).forEach(([key, value]) => {
+      if (value === undefined || value === null)
+        return
+      const stringValue = typeof value === 'string' ? applyTemplate(value, context) : String(value)
+      headers[key] = stringValue
+    })
+    return headers
+  }
+  catch (error) {
+    window.alert(t('video_card.operation.push_to_phone_invalid_headers'))
+    console.error('[VideoCardContextMenu] invalid headers config', error)
+    return null
+  }
+}
+
+async function pushVideoLinkToPhone() {
+  if (isPushingToPhone.value)
+    return
+
+  const apiUrlTemplate = settings.value.phonePushApiUrl?.trim()
+  if (!apiUrlTemplate) {
+    window.alert(t('video_card.operation.push_to_phone_missing_config'))
+    return
+  }
+
+  const videoUrl = resolveVideoUrl(props.video)
+  if (!videoUrl) {
+    window.alert(t('video_card.operation.push_to_phone_failed'))
+    return
+  }
+
+  const context = buildTemplateContext(videoUrl)
+  const requestUrl = applyTemplate(apiUrlTemplate, context)
+  if (!requestUrl) {
+    window.alert(t('video_card.operation.push_to_phone_failed'))
+    return
+  }
+
+  const headers = buildHeaders(settings.value.phonePushApiHeaders, context)
+  if (headers === null)
+    return
+
+  const method = (settings.value.phonePushApiMethod || 'POST').toUpperCase()
+  const normalizedMethod: 'GET' | 'POST' = method === 'GET' ? 'GET' : 'POST'
+
+  const finalHeaders: Record<string, string> = { ...headers }
+  const requestInit: RequestInit = {
+    method: normalizedMethod,
+  }
+
+  if (normalizedMethod === 'POST') {
+    const payloadTemplate = settings.value.phonePushApiPayloadTemplate || ''
+    const payload = applyTemplate(payloadTemplate, context)
+
+    requestInit.body = payload
+
+    if (!Object.keys(finalHeaders).some(key => key.toLowerCase() === 'content-type'))
+      finalHeaders['Content-Type'] = 'application/json'
+  }
+
+  if (Object.keys(finalHeaders).length > 0)
+    requestInit.headers = finalHeaders
+
+  isPushingToPhone.value = true
+  try {
+    const response = await fetch(requestUrl, requestInit)
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '')
+      throw new Error(errorText || response.statusText)
+    }
+    handleClose()
+  }
+  catch (error) {
+    console.error('[VideoCardContextMenu] push to phone failed', error)
+    window.alert(t('video_card.operation.push_to_phone_failed'))
+  }
+  finally {
+    isPushingToPhone.value = false
   }
 }
 

@@ -71,6 +71,7 @@ settings:
   group_languages_and_fonts: Languages & Fonts
   group_link_opening_behavior: Link Opening Behavior
   group_video_card: Video Card
+  group_phone_push: Phone Push
   group_performance: Frosted Glass & Performance
   group_topbar: Top Bar
   group_dock: Dock
@@ -152,6 +153,22 @@ settings:
   enable_video_preview: Enable video preview feature (if possible)
   enable_video_ctrl_bar_on_video_card: Display the video control bar on the video card
   hover_video_card_delayed: Delayed video preview on hover over the video card
+
+  phone_push_api_url: Push API URL
+  phone_push_api_url_desc: The current video link will be sent to your phone via this endpoint.
+  phone_push_api_url_placeholder: e.g. https://api.example.com/push
+  phone_push_api_method: HTTP method
+  phone_push_api_method_opt:
+    post: POST
+    get: GET
+  phone_push_api_headers: Custom headers
+  phone_push_api_headers_desc: Provide a JSON object. The same placeholders listed below are supported.
+  phone_push_api_headers_placeholder: ''
+  phone_push_api_payload_template: Payload template
+  phone_push_api_payload_template_desc: |-
+    Supported placeholders: {url}, {title}, {cover}, {author}, {bvid}, {aid}.
+    Additional helpers: {urlEncoded}, {titleEncoded}, {coverEncoded}, {authorEncoded} (URL encoded) and {urlJson}, {titleJson}, {coverJson}, {authorJson} (JSON string).
+  phone_push_api_payload_template_placeholder: ''
 
   # Desktop & Dock
   use_old_top_bar: Use the old top bar
@@ -421,6 +438,12 @@ video_card:
     copy_video_link: Copy Video Link
     copy_bv_number: Copy BV Number
     copy_av_number: Copy AV Number
+
+    push_to_phone: Push to Phone
+    push_to_phone_success: Sent to phone
+    push_to_phone_failed: Failed to push, please try again later
+    push_to_phone_missing_config: Configure the push API in Settings first
+    push_to_phone_invalid_headers: Custom headers must be a valid JSON object
 
     view_the_original_cover: View the Original Cover
 

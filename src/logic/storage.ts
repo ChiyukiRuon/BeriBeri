@@ -34,6 +34,10 @@ export interface Settings {
 
   enableVideoCtrlBarOnVideoCard: boolean
   hoverVideoCardDelayed: boolean
+  phonePushApiUrl: string
+  phonePushApiMethod: 'GET' | 'POST'
+  phonePushApiHeaders: string
+  phonePushApiPayloadTemplate: string
 
   // Desktop & Dock
   useOldTopBar: boolean
@@ -138,6 +142,10 @@ export const originalSettings: Settings = {
   enableVideoPreview: true,
   enableVideoCtrlBarOnVideoCard: false,
   hoverVideoCardDelayed: false,
+  phonePushApiUrl: '',
+  phonePushApiMethod: 'POST',
+  phonePushApiHeaders: '{}',
+  phonePushApiPayloadTemplate: '{"url":{urlJson},"title":{titleJson},"cover":{coverJson}}',
 
   // Desktop & Dock
   useOldTopBar: false,
