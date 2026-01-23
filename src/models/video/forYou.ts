@@ -11,9 +11,9 @@ export interface Data {
   item: Item[]
   side_bar_column: any[]
   business_card: null
-  floor_info: null
-  user_feature: null
-  preload_expose_pct: number
+  floor_info: null | any
+  user_feature: null | any
+  preload_expose_pct: number | any
   preload_floor_expose_pct: number
   mid: number
 }
@@ -29,24 +29,27 @@ export interface Item {
   title: string
   duration: number
   pubdate: number
-  owner: Owner
-  stat: Stat
-  av_feature: null
+  owner: Owner | null
+  stat: Stat | null
+  av_feature: null | any
   is_followed: number
-  rcmd_reason: RcmdReason
+  rcmd_reason: RcmdReason | null
   show_info: number
   track_id: string
-  pos: number
-  room_info: null
-  ogv_info: null
+  pos: number | any
+  room_info: null | any
+  ogv_info: null | any
   business_info: null
   is_stock: number
   enable_vt: number
   vt_display: string
+  dislike_switch?: number // 可选字段
+  dislike_switch_pc?: number // 可选字段
 }
 
 export enum Goto {
   AV = 'av',
+  AD = 'ad',
 }
 
 export interface Owner {
