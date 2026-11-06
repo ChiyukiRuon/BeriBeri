@@ -152,6 +152,8 @@ async function handleMessage(payload: HMRPayload) {
 
       break
     }
+    case 'ping':
+        break
     default: {
       const check: never = payload
       return check
