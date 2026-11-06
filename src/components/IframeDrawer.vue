@@ -22,7 +22,6 @@ const iframeRef = ref<HTMLIFrameElement | null>(null)
 const currentUrl = ref<string>(props.url)
 const showIframe = ref<boolean>(false)
 const delayCloseTimer = ref<NodeJS.Timeout | null>(null)
-const removeTopBarClassInjected = ref<boolean>(false)
 
 useEventListener(window, 'popstate', updateIframeUrl)
 
@@ -34,17 +33,6 @@ function setupIframeListeners() {
   useEventListener(iframeRef.value, 'load', () => {
     useEventListener(iframeRef.value?.contentWindow, 'pushstate', updateCurrentUrl)
     useEventListener(iframeRef.value?.contentWindow, 'popstate', updateCurrentUrl)
-
-    useEventListener(iframeRef.value?.contentWindow, 'DOMContentLoaded', () => {
-      if (headerShow.value) {
-        iframeRef.value?.contentWindow?.document.documentElement.classList.add('remove-top-bar-without-placeholder')
-        removeTopBarClassInjected.value = true
-      }
-      else {
-        iframeRef.value?.contentWindow?.document.documentElement.classList.remove('remove-top-bar-without-placeholder')
-        removeTopBarClassInjected.value = false
-      }
-    })
   })
 }
 
@@ -264,8 +252,9 @@ watchEffect(() => {
     <Transition name="drawer">
       <div
         v-if="show"
-        :pos="`absolute ${headerShow ? 'top-$bew-top-bar-height' : 'top-0'} left-0`" of-hidden bg="$bew-bg"
-        rounded="t-$bew-radius" w-full h-full
+        pos="absolute bottom-0 left-0" of-hidden bg="$bew-bg"
+        :style="{ top: headerShow ? 'var(--bew-top-bar-height)' : '0' }"
+        rounded="t-$bew-radius" w-full
       >
         <Transition name="fade">
           <iframe
@@ -273,13 +262,9 @@ watchEffect(() => {
             ref="iframeRef"
             :src="props.url"
             sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-            :style="{
-              // Prevent top bar shaking when before the remove-top-bar-without-placeholder class is injected
-              top: !removeTopBarClassInjected ? `calc(-1 * var(--bew-top-bar-height))` : '0',
-            }"
             frameborder="0"
             pointer-events-auto
-            pos="relative left-0"
+            pos="relative top-0 left-0" block
             allow="fullscreen"
             w-full
             h-full @load="showIframe = true"

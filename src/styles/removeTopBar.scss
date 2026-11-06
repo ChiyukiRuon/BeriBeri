@@ -24,7 +24,16 @@
 }
 
 .remove-top-bar-without-placeholder {
-  #biliMainHeader {
-    display: none;
-  }
+    .bili-header,
+    #biliMainHeader,
+    #internationalHeader,
+    #bili-header-container {
+        display: none !important;
+    }
+}
+
+// Hide the retained native header surface when the replacement header is active.
+.remove-top-bar .bili-header {
+    background: transparent !important;
+    box-shadow: none !important;
 }

@@ -9,8 +9,9 @@ import { AppPage } from '~/enums/appEnums'
 import { settings } from '~/logic'
 import { type DockItem, useMainStore } from '~/stores/mainStore'
 import { useSettingsStore } from '~/stores/settingsStore'
-import { isHomePage, isInIframe, isNotificationPage, isVideoOrBangumiPage, openLinkToNewTab, queryDomUntilFound, scrollToTop } from '~/utils/main'
+import { isHomePage, isInIframe, isNotificationPage, isVideoOrBangumiPage, openLinkToNewTab, scrollToTop } from '~/utils/main'
 import emitter from '~/utils/mitt'
+import { isPlayerWebFullscreen } from '~/utils/player-fullscreen'
 
 import { setupNecessarySettingsWatchers } from './necessarySettingsWatchers'
 
@@ -93,7 +94,11 @@ const showBewlyPage = computed((): boolean => {
 
   return isHomePage() && !settings.value.useOriginalBilibiliHomepage
 })
+const playerWebFullscreen = ref(false)
 const showTopBar = computed((): boolean => {
+    if (playerWebFullscreen.value)
+        return false
+
   // When using the open in drawer feature, the iframe inside the page will hide the top bar
   if (isVideoOrBangumiPage() && isInIframe())
     return false
@@ -288,33 +293,38 @@ async function haveScrollbar() {
   }
 }
 
-// In drawer video, watch btn className changed and post message to parent
-watchEffect(async (onCleanUp) => {
-  if (!isInIframe())
-    return null
+// Track both ordinary video and PGC players, including player replacement between episodes.
+watchEffect((onCleanUp) => {
+    if (!isVideoOrBangumiPage())
+        return
 
-  const observer = new MutationObserver(([{ target: el }]) => {
-    if (!(el instanceof HTMLElement))
-      return null
-    if (el.classList.contains('bpx-state-entered')) {
-      parent.postMessage(DRAWER_VIDEO_ENTER_PAGE_FULL)
+    let frame = 0
+    const updateFullscreen = () => {
+        frame = 0
+        const fullscreen = isPlayerWebFullscreen()
+        if (playerWebFullscreen.value === fullscreen)
+            return
+        playerWebFullscreen.value = fullscreen
+        if (isInIframe()) {
+            parent.postMessage(fullscreen ? DRAWER_VIDEO_ENTER_PAGE_FULL : DRAWER_VIDEO_EXIT_PAGE_FULL, location.origin)
+        }
     }
-    else {
-      parent.postMessage(DRAWER_VIDEO_EXIT_PAGE_FULL)
-    }
-  })
+    const observer = new MutationObserver(() => {
+        if (!frame)
+            frame = requestAnimationFrame(updateFullscreen)
+    })
+    observer.observe(document.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-screen'],
+    })
+    updateFullscreen()
 
-  const abort = new AbortController()
-  queryDomUntilFound('.bpx-player-ctrl-btn.bpx-player-ctrl-web', 500, abort).then((openVideo2WebFullBtn) => {
-    if (!openVideo2WebFullBtn)
-      return
-    observer.observe(openVideo2WebFullBtn, { attributes: true })
-  })
-
-  onCleanUp(() => {
-    observer.disconnect()
-    abort.abort()
-  })
+    onCleanUp(() => {
+        observer.disconnect()
+        cancelAnimationFrame(frame)
+    })
 })
 
 provide<BewlyAppProvider>('BEWLY_APP', {

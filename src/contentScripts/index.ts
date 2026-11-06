@@ -119,6 +119,11 @@ export function isSupportedIframePages(): boolean {
   }
 }
 
+// Keep embedded viewports intact so fixed image viewers remain inside the drawer.
+if (isInIframe() && (isVideoOrBangumiPage() || isNotificationPage())) {
+    document.documentElement.classList.add('remove-top-bar-without-placeholder')
+}
+
 let beforeLoadedStyleEl: HTMLStyleElement | undefined
 
 if (isSupportedPages() || isSupportedIframePages()) {
