@@ -17,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const show = ref(false)
+const returnUrl = location.href
 const headerShow = ref(false)
 const iframeRef = ref<HTMLIFrameElement | null>(null)
 const currentUrl = ref<string>(props.url)
@@ -53,7 +54,7 @@ onBeforeUnmount(() => {
 })
 
 onUnmounted(() => {
-  history.replaceState(null, '', 'https://www.bilibili.com')
+    history.replaceState(null, '', returnUrl)
 })
 
 function updateCurrentUrl(e: any) {

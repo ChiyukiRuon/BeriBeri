@@ -50,6 +50,7 @@ export async function getManifest() {
     content_scripts: [
       {
         matches: [
+          '*://bilibili.com/*',
           '*://www.bilibili.com/*',
           '*://search.bilibili.com/*',
           '*://t.bilibili.com/*',
@@ -69,6 +70,7 @@ export async function getManifest() {
       },
       {
         matches: [
+          '*://bilibili.com/*',
           '*://www.bilibili.com/*',
           '*://search.bilibili.com/*',
           '*://t.bilibili.com/*',

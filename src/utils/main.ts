@@ -150,15 +150,7 @@ export function delay(ms: number) {
  * @returns true if the current page is the home page
  */
 export function isHomePage(url: string = location.href): boolean {
-  if (
-    /https?:\/\/(?:www\.)?bilibili.com\/?(?:#\/?)?$/.test(url)
-    || /https?:\/\/(?:www\.)?bilibili.com\/index\.html$/.test(url)
-    || /https?:\/\/(?:www\.)?bilibili.com\/\?spm_id_from=.*/.test(url)
-    || /https?:\/\/www\.bilibili\.com\/\?.*$/.test(url)
-  ) {
-    return true
-  }
-  return false
+    return /^https?:\/\/(?:www\.)?bilibili\.com(?:\/(?:index\.html|(?:zh-Hans|zh-Hant|en|ja|th|ar|pt|es|id|ms|ru|tr|vi)\/?)?)?(?:[?#].*)?$/.test(url)
 }
 
 /**

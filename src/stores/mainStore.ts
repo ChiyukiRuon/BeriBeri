@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import { HomeSubPage } from '~/contentScripts/views/Home/types'
 import { AppPage } from '~/enums/appEnums'
-import { getUserID } from '~/utils/main'
+import { getUserID, isHomePage } from '~/utils/main'
 
 export interface DockItem {
   i18nKey: string
@@ -21,6 +21,7 @@ export interface HomeTab {
 }
 
 export const useMainStore = defineStore('main', () => {
+    const homeUrl = isHomePage() ? location.origin + location.pathname : 'https://www.bilibili.com/'
   const dockItems = computed((): DockItem[] => {
     return [
       {
@@ -30,7 +31,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.Home,
         openInNewTab: false,
         useOriginalBiliPage: false,
-        url: 'https://www.bilibili.com',
+        url: homeUrl,
         hasBewlyPage: true,
       },
       {
@@ -146,5 +147,5 @@ export const useMainStore = defineStore('main', () => {
     return activatedCover.value
   }
 
-  return { dockItems, homeTabs, getBiliWebPageURLByPage, getDockItemByPage, setActivatedCover, getActivatedCover }
+  return { homeUrl, dockItems, homeTabs, getBiliWebPageURLByPage, getDockItemByPage, setActivatedCover, getActivatedCover }
 })

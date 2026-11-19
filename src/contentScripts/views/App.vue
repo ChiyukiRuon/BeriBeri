@@ -179,14 +179,14 @@ onMounted(() => {
 function handleDockItemClick(dockItem: DockItem) {
   // Opening in a new tab while still on the current tab doesn't require changing the `activatedPage`
   if (dockItem.openInNewTab) {
-    openLinkToNewTab(`https://www.bilibili.com/?page=${dockItem.page}`)
+    openLinkToNewTab(`${mainStore.homeUrl}?page=${dockItem.page}`)
   }
   else {
     if (dockItem.useOriginalBiliPage) {
       // It seem like the `activatedPage` watcher above will handle this, so no need to set iframePageURL.value here
       // iframePageURL.value = dockItem.url
       if (!isHomePage()) {
-        location.href = `https://www.bilibili.com/?page=${dockItem.page}`
+        location.href = `${mainStore.homeUrl}?page=${dockItem.page}`
       }
     }
     else {
@@ -197,7 +197,7 @@ function handleDockItemClick(dockItem: DockItem) {
         }, 200)
       }
       else {
-        location.href = `https://www.bilibili.com/?page=${dockItem.page}`
+        location.href = `${mainStore.homeUrl}?page=${dockItem.page}`
       }
     }
 

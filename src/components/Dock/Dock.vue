@@ -153,7 +153,7 @@ function handleDockItemClick($event: MouseEvent, dockItem: DockItem) {
 
 function openDockItemInNewTab(dockItem: DockItem) {
   activatedDockItem.value = dockItem
-  openLinkToNewTab(`https://www.bilibili.com/?page=${dockItem.page}`)
+  openLinkToNewTab(`${mainStore.homeUrl}?page=${dockItem.page}`)
 }
 
 function handleBackToTopOrRefresh(action: 'backToTop' | 'refresh' | 'auto' = 'auto') {
