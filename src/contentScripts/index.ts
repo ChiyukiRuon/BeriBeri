@@ -9,7 +9,7 @@ import { settings } from '~/logic'
 import { setupApp } from '~/logic/common-setup'
 import RESET_BEWLY_CSS from '~/styles/reset.css?raw'
 import { runWhenIdle } from '~/utils/lazyLoad'
-import { compareVersions, injectCSS, isHomePage, isInIframe, isNotificationPage, isVideoOrBangumiPage } from '~/utils/main'
+import { compareVersions, getBilibiliLocale, injectCSS, isHomePage, isInIframe, isNotificationPage, isVideoOrBangumiPage, withoutBilibiliLocale } from '~/utils/main'
 import { SVG_ICONS } from '~/utils/svgIcons'
 
 import { version } from '../../package.json'
@@ -28,7 +28,18 @@ if (isFirefox) {
   window.clearTimeout = window.clearTimeout.bind(window)
 }
 
-const currentUrl = document.URL
+const currentUrl = withoutBilibiliLocale(document.URL)
+
+if (isHomePage() && !isInIframe()) {
+    const initialLanguage = getBilibiliLocale()
+    const reloadOnLanguageChange = () => {
+        if (isHomePage() && getBilibiliLocale() !== initialLanguage)
+            location.reload()
+    }
+    window.addEventListener('popstate', reloadOnLanguageChange)
+    window.addEventListener('pushstate', () => queueMicrotask(reloadOnLanguageChange))
+    window.addEventListener('replacestate', () => queueMicrotask(reloadOnLanguageChange))
+}
 
 function isSupportedPages(): boolean {
   if (isInIframe())

@@ -6,7 +6,7 @@ import browser from 'webextension-polyfill'
 import HorizontalScrollView from '~/components/HorizontalScrollView.vue'
 import type { Result as TimetableItem, TimetableResult } from '~/models/anime/timeTable'
 import api from '~/utils/api'
-import { removeHttpFromUrl } from '~/utils/main'
+import { localizeBilibiliLink, removeHttpFromUrl } from '~/utils/main'
 
 const { t } = useI18n()
 const animeTimeTable = reactive<TimetableItem[]>([])
@@ -129,7 +129,7 @@ defineExpose({ refreshAnimeTimeTable })
 
               <div flex gap-4>
                 <a
-                  :href="`//www.bilibili.com/bangumi/play/ss${episode.season_id}`"
+                  :href="localizeBilibiliLink(`//www.bilibili.com/bangumi/play/ss${episode.season_id}`)"
                   target="_blank" tabindex="-1"
                   shrink-0
                 >
@@ -145,7 +145,7 @@ defineExpose({ refreshAnimeTimeTable })
                 </a>
                 <div flex="~ col">
                   <a
-                    :href="`//www.bilibili.com/bangumi/play/ss${episode.season_id}`"
+                    :href="localizeBilibiliLink(`//www.bilibili.com/bangumi/play/ss${episode.season_id}`)"
                     target="_blank"
                   >{{ episode.title }}</a>
                   <p mt-auto text="$bew-theme-color">

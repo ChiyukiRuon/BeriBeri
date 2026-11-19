@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useBewlyApp } from '~/composables/useAppProvider'
 import { settings } from '~/logic'
-import { isHomePage } from '~/utils/main'
+import { isHomePage, localizeBilibiliLink } from '~/utils/main'
 
 const props = defineProps<{
   href: string
@@ -16,6 +16,8 @@ const emit = defineEmits<{
 }>()
 
 const { openIframeDrawer } = useBewlyApp()
+
+const linkUrl = computed(() => localizeBilibiliLink(props.href))
 
 const openMode = computed(() => {
   if (props.type === 'topBar')
@@ -52,13 +54,13 @@ function handleClick(event: MouseEvent) {
 
   if (openMode.value === 'drawer') {
     event.preventDefault()
-    openIframeDrawer(props.href)
+    openIframeDrawer(linkUrl.value)
   }
 }
 </script>
 
 <template>
-  <a :href="href" :target="target" :title="title" :rel="rel" @click="handleClick">
+  <a :href="linkUrl" :target="target" :title="title" :rel="rel" @click="handleClick">
     <slot />
   </a>
 </template>

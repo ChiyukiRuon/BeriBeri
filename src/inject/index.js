@@ -42,6 +42,10 @@ injectFunction(
   },
 )
 
+injectFunction(window.history, ['replaceState'], () => {
+    window.dispatchEvent(new Event('replacestate'))
+})
+
 window.___inject = true
 
 // History.prototype.pushState = history.pushState

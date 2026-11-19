@@ -2,7 +2,7 @@
 import { useDark } from '~/composables/useDark'
 import { useMainStore } from '~/stores/mainStore'
 import { numFormatter } from '~/utils/dataFormatter'
-import { removeHttpFromUrl } from '~/utils/main'
+import { localizeBilibiliLink, removeHttpFromUrl } from '~/utils/main'
 
 import BangumiCardSkeleton from './BangumiCardSkeleton.vue'
 
@@ -169,7 +169,7 @@ function handleMouseEnter(bangumi: Bangumi) {
       >
         <p un-text="lg" mb-2>
           <a
-            :href="bangumi.url" target="_blank"
+            :href="localizeBilibiliLink(bangumi.url)" target="_blank"
             class="keep-two-lines"
             :title="bangumi.title"
           >

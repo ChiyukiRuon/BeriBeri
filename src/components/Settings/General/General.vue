@@ -6,7 +6,7 @@ import { settings } from '~/logic'
 import SettingsItem from '../components/SettingsItem.vue'
 import SettingsItemGroup from '../components/SettingsItemGroup.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const langOptions = computed(() => {
   return [
@@ -93,9 +93,6 @@ const phonePushApiMethodOptions = computed(() => {
   ]
 })
 
-watch(() => settings.value.language, (newValue) => {
-  locale.value = newValue
-})
 </script>
 
 <template>

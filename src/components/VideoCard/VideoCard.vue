@@ -12,7 +12,7 @@ import { useMainStore } from '~/stores/mainStore'
 import api from '~/utils/api'
 import { getTvSign, TVAppKey } from '~/utils/authProvider'
 import { calcCurrentTime, calcTimeSince, numFormatter } from '~/utils/dataFormatter'
-import { getCSRF, removeHttpFromUrl } from '~/utils/main'
+import { getCSRF, localizeBilibiliLink, removeHttpFromUrl } from '~/utils/main'
 
 import Tooltip from '../Tooltip.vue'
 import type { Video } from './types'
@@ -60,11 +60,11 @@ const videoUrl = computed(() => {
     return undefined
 
   if (props.video.url)
-    return props.video.url
+    return localizeBilibiliLink(props.video.url)
   else if (props.video.bvid || props.video.aid)
-    return getCurrentVideoUrl(props.video, videoCurrentTime)
+    return localizeBilibiliLink(getCurrentVideoUrl(props.video, videoCurrentTime))
   else if (props.video.epid)
-    return `https://www.bilibili.com/bangumi/play/ep${props.video.epid}`
+    return localizeBilibiliLink(`https://www.bilibili.com/bangumi/play/ep${props.video.epid}`)
   else if (props.video.roomid)
     return `https://live.bilibili.com/${props.video.roomid}`
   else

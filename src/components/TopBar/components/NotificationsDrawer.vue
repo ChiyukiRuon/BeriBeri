@@ -18,7 +18,7 @@ const { mainAppRef } = useBewlyApp()
 
 const show = ref(false)
 const iframeRef = ref<HTMLIFrameElement | null>(null)
-const currentUrl = ref<string>(props.url || 'https://message.bilibili.com/')
+const currentUrl = ref(props.url)
 const showIframe = ref(false)
 const delayCloseTimer = ref<NodeJS.Timeout | null>(null)
 
@@ -81,10 +81,10 @@ async function releaseIframeResources() {
 function handleOpenInNewTab() {
   if (iframeRef.value) {
     try {
-      window.open(iframeRef.value.contentWindow?.location.href.replace(/\/$/, ''), '_blank')
+      window.open(iframeRef.value.contentWindow?.location.href || currentUrl.value, '_blank')
     }
     catch {
-      window.open('https://message.bilibili.com/', '_blank')
+      window.open(currentUrl.value, '_blank')
     }
     handleClose()
   }

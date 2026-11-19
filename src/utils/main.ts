@@ -44,7 +44,7 @@ export function removeHttpFromUrl(url: string): string {
 }
 
 export function openLinkToNewTab(url: string, features: string = '') {
-  window.open(url, '_blank', features)
+  window.open(localizeBilibiliLink(url), '_blank', features)
 }
 
 /**
@@ -144,13 +144,47 @@ export function delay(ms: number) {
   })
 }
 
-/**
- * Check if the current page is the home page
- * @param url the url to check
- * @returns true if the current page is the home page
- */
+const localizedRoute = /^(https?:\/\/(?:(?:www|t|space|message)\.)?bilibili\.com)\/(zh-Hans|zh-Hant|en|ja|th|ar|pt|es|id|ms|ru|tr|vi)(?=\/|[?#]|$)/
+
+export function getBilibiliLocale(url = location.href): string {
+    return localizedRoute.exec(url)?.[2] || ''
+}
+
+export function withoutBilibiliLocale(url: string): string {
+    return url.replace(localizedRoute, '$1')
+}
+
+export function localizeBilibiliLink(href: string, source = location.href): string {
+    const locale = getBilibiliLocale(source)
+    if (!locale || !href)
+        return href
+
+    let target: URL
+    try {
+        target = new URL(href, source)
+    }
+    catch {
+        return href
+    }
+
+    if (!/^https?:$/.test(target.protocol) || !/^(?:(?:www|t|space|message)\.)?bilibili\.com$/.test(target.host))
+        return href
+    if (localizedRoute.test(target.href))
+        return target.href
+
+    if (target.hostname === 'message.bilibili.com' && target.pathname === '/') {
+        target.pathname = '/' + locale
+        if (!target.hash)
+            target.hash = '/'
+    }
+    else {
+        target.pathname = '/' + locale + target.pathname
+    }
+    return target.href
+}
+
 export function isHomePage(url: string = location.href): boolean {
-    return /^https?:\/\/(?:www\.)?bilibili\.com(?:\/(?:index\.html|(?:zh-Hans|zh-Hant|en|ja|th|ar|pt|es|id|ms|ru|tr|vi)\/?)?)?(?:[?#].*)?$/.test(url)
+    return /^https?:\/\/(?:www\.)?bilibili\.com(?:\/(?:index\.html)?)?(?:[?#].*)?$/.test(withoutBilibiliLocale(url))
 }
 
 /**
@@ -158,7 +192,8 @@ export function isHomePage(url: string = location.href): boolean {
  * @param url the url to check
  * @returns true if the current page is a video or bangumi page
  */
-export function isVideoOrBangumiPage(url: string = location.href): boolean {
+export function isVideoOrBangumiPage(pageUrl: string = location.href): boolean {
+    const url = withoutBilibiliLocale(pageUrl)
   if (
     // video page
     /https?:\/\/(?:www\.)?bilibili\.com\/(?:video|list)\/.*/.test(url)

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { localizeBilibiliLink } from '~/utils/main'
 import { useI18n } from 'vue-i18n'
 import browser from 'webextension-polyfill'
 
@@ -188,7 +189,7 @@ async function checkGitHubRelease() {
               <div i-tabler:brand-github /> GitHub
             </a>
             <a
-              href="https://space.bilibili.com/648765401/dynamic" target="_blank"
+              :href="localizeBilibiliLink('https://space.bilibili.com/648765401/dynamic')" target="_blank"
               class="link-card"
               bg="#fb7299 dark:#ffa7c0 !opacity-10 !hover:opacity-20"
               un-text="#fb7299 dark:#ffa7c0"
@@ -296,7 +297,7 @@ async function checkGitHubRelease() {
           <div grid="~ lg:cols-2 md:cols-2 cols-1 gap-2" mx--2>
             <div v-for="helper in safariHelpers" :key="helper.name">
               <a
-                :href="helper.url" target="_blank"
+                :href="localizeBilibiliLink(helper.url)" target="_blank"
                 flex="~ items-center gap-2"
                 bg="hover:$bew-fill-2"
                 p-2 rounded="$bew-radius"

@@ -7,8 +7,9 @@ import { useDelayedHover } from '~/composables/useDelayedHover'
 import { OVERLAY_SCROLL_BAR_SCROLL, TOP_BAR_VISIBILITY_CHANGE } from '~/constants/globalEvents'
 import { AppPage } from '~/enums/appEnums'
 import { settings } from '~/logic'
+import { useMainStore } from '~/stores/mainStore'
 import api from '~/utils/api'
-import { getUserID, isHomePage, removeHttpFromUrl } from '~/utils/main'
+import { getUserID, isHomePage, localizeBilibiliLink, removeHttpFromUrl, withoutBilibiliLocale } from '~/utils/main'
 import emitter from '~/utils/mitt'
 
 import ChannelsPop from './components/ChannelsPop.vue'
@@ -35,6 +36,9 @@ import type { UnReadDm, UnReadMessage, UserInfo } from './types'
 
 const { activatedPage, scrollbarRef, reachTop } = useBewlyApp()
 
+const pageUrl = withoutBilibiliLocale(location.href)
+const showChannels = pageUrl === location.href
+const { homeUrl } = useMainStore()
 const mid = getUserID() || ''
 const userInfo = reactive<UserInfo | NonNullable<unknown>>({}) as UnwrapNestedRefs<UserInfo>
 
@@ -81,15 +85,15 @@ const isTopBarFixed = computed(() => {
   if (
     (isHomePage() && settings.value.useOriginalBilibiliHomepage)
     // video page
-    || /https?:\/\/(?:www.)?bilibili.com\/(?:video|list)\/.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/(?:video|list)\/.*/.test(pageUrl)
     // anime playback & movie page
-    || /https?:\/\/(?:www.)?bilibili.com\/bangumi\/play\/.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/bangumi\/play\/.*/.test(pageUrl)
     // moment page
     || /https?:\/\/t.bilibili.com.*/.test(location.href)
     // channel, anime, chinese anime, tv shows, movie, variety shows, mooc
-    || /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(pageUrl)
     // articles page
-    || /https?:\/\/(?:www.)?bilibili.com\/read\/home.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/read\/home.*/.test(pageUrl)
   ) {
     return true
   }
@@ -133,7 +137,7 @@ const rightSideInactive = computed(() => {
 })
 
 // Channels
-const channels = useDelayedHover({
+const channels = !showChannels ? ref<HTMLElement>() : useDelayedHover({
   beforeEnter: () => closeAllTopBarPopup('channels'),
   enter: () => {
     popupVisible.channels = true
@@ -486,7 +490,7 @@ defineExpose({
             z-1 relative w-fit mr-auto
           >
             <a
-              ref="logo" href="//www.bilibili.com"
+              ref="logo" :href="homeUrl"
               target="_top"
               class="group logo"
               :class="{ activated: popupVisible.channels }"
@@ -510,7 +514,7 @@ defineExpose({
 
             <Transition name="slide-in">
               <ChannelsPop
-                v-show="popupVisible.channels"
+                v-if="showChannels && popupVisible.channels"
                 class="bew-popover"
                 pos="!left-0 !top-70px"
                 transform="!translate-x-0"
@@ -612,7 +616,7 @@ defineExpose({
               <!-- TODO: need to refactor to this -->
               <!-- <div display="lg:flex none">
               <div v-for="item in topBarItems" :key="item.i18nKey" class="right-side-item">
-                <a :href="item.url" target="_blank" :title="$t(item.i18nKey)">
+                <a :href="localizeBilibiliLink(item.url)" target="_blank" :title="$t(item.i18nKey)">
                   <Icon :icon="item.icon" />
                 </a>
 
@@ -724,7 +728,7 @@ defineExpose({
                   :class="{ active: popupVisible.history }"
                 >
                   <ALink
-                    href="https://www.bilibili.com/account/history"
+                    href="https://www.bilibili.com/history"
                     :title="$t('topbar.history')"
                     type="topBar"
                   >

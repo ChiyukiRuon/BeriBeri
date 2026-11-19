@@ -4,7 +4,6 @@ import type { Ref } from 'vue'
 
 import { useBewlyApp } from '~/composables/useAppProvider'
 import { FilterType, useFilter } from '~/composables/useFilter'
-import { LanguageType } from '~/enums/appEnums'
 import type { GridLayoutType } from '~/logic'
 import { accessKey, settings } from '~/logic'
 import type { AppForYouResult, Item as AppVideoItem } from '~/models/video/appForYou'
@@ -12,7 +11,14 @@ import { Type as ThreePointV2Type } from '~/models/video/appForYou'
 import type { forYouResult, Item as VideoItem } from '~/models/video/forYou'
 import api from '~/utils/api'
 import { TVAppKey } from '~/utils/authProvider'
+import { getBilibiliLocale, getCookie } from '~/utils/main'
+import { getFeedLocaleParams } from '~/utils/page-language'
 import { isVerticalVideo } from '~/utils/uriParse'
+
+const siteLanguage = getBilibiliLocale()
+const appLanguage = ({ 'zh-Hans': 'zh-Hans_CN', 'zh-Hant': 'zh-Hant_TW' } as Record<string, string>)[siteLanguage] || siteLanguage || 'zh-Hans_CN'
+const translateTitles = getCookie('always_translate') !== '0'
+const localeParams = getFeedLocaleParams(location.href, translateTitles)
 
 const props = defineProps<{
   gridLayout: GridLayoutType
@@ -169,6 +175,7 @@ async function getRecommendVideos() {
 
     const currentRefreshIdx = refreshIdx.value
     const response: forYouResult = await api.video.getRecommendVideos({
+      ...localeParams,
       fresh_idx: currentRefreshIdx,
       ps: PAGE_SIZE,
     })
@@ -274,8 +281,9 @@ async function getAppRecommendVideos() {
 
     const response: AppForYouResult = await api.video.getAppRecommendVideos({
       access_key: accessKey.value,
-      s_locale: settings.value.language === LanguageType.Mandarin_TW || settings.value.language === LanguageType.Cantonese ? 'zh-Hant_TW' : 'zh-Hans_CN',
-      c_locate: settings.value.language === LanguageType.Mandarin_TW || settings.value.language === LanguageType.Cantonese ? 'zh-Hant_TW' : 'zh-Hans_CN',
+      ...localeParams,
+      s_locale: appLanguage,
+      c_locate: appLanguage,
       appkey: TVAppKey.appkey,
       idx: appVideoList.value.length > 0 ? appVideoList.value[appVideoList.value.length - 1].item?.idx : 1,
     })
@@ -369,7 +377,8 @@ defineExpose({ initData })
             id: video.item.id,
             duration: video.item.duration,
             refreshIdx,
-            title: video.item.title,
+            title: (translateTitles && video.item.translated_title) || video.item.title,
+            tag: video.item.rcmd_reason?.content,
             cover: video.item.pic,
             author: {
               name: video.item.owner?.name || '',
@@ -398,7 +407,8 @@ defineExpose({ initData })
           :video="video.item ? {
             id: video.item.args.aid ?? 0,
             durationStr: video.item.cover_right_text,
-            title: `${video.item.title}`,
+            title: (translateTitles && video.item.translated_title) || video.item.title || '',
+            tag: video.item.bottom_rcmd_reason,
             cover: `${video.item.cover}`,
             author: {
               name: video.item?.mask?.avatar.text,

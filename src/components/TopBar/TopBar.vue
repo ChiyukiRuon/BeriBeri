@@ -8,8 +8,9 @@ import { useDelayedHover } from '~/composables/useDelayedHover'
 import { OVERLAY_SCROLL_BAR_SCROLL, TOP_BAR_VISIBILITY_CHANGE } from '~/constants/globalEvents'
 import { AppPage } from '~/enums/appEnums'
 import { settings } from '~/logic'
+import { useMainStore } from '~/stores/mainStore'
 import api from '~/utils/api'
-import { getUserID, isHomePage, isInIframe, removeHttpFromUrl } from '~/utils/main'
+import { getUserID, isHomePage, isInIframe, localizeBilibiliLink, removeHttpFromUrl, withoutBilibiliLocale } from '~/utils/main'
 import emitter from '~/utils/mitt'
 import { createTransformer } from '~/utils/transformer'
 
@@ -40,6 +41,9 @@ import type { UnReadDm, UnReadMessage, UserInfo } from './types'
 const { activatedPage, scrollbarRef, reachTop } = useBewlyApp()
 const { isDark } = useDark()
 
+const pageUrl = withoutBilibiliLocale(location.href)
+const showChannels = pageUrl === location.href
+const { homeUrl } = useMainStore()
 const mid = getUserID() || ''
 const userInfo = reactive<UserInfo | NonNullable<unknown>>({}) as UnwrapNestedRefs<UserInfo>
 
@@ -77,8 +81,8 @@ const forceWhiteIcon = computed((): boolean => {
     // 分區頁面由於上面有背景，所以強制 icon 變白色用於區分背景
     // channel, anime, chinese anime, tv shows, movie, variety shows, mooc but not including video page
     || (
-      /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(location.href)
-      && !/https?:\/\/(?:www.)?bilibili.com\/video.*/.test(location.href)
+      /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(pageUrl)
+      && !/https?:\/\/(?:www.)?bilibili.com\/video.*/.test(pageUrl)
     )
     // user space page 空間頁
     || /https?:\/\/space.bilibili\.com\.*/.test(location.href)
@@ -134,15 +138,15 @@ const isTopBarFixed = computed((): boolean => {
   if (
     isHomePage()
     // video page
-    || /https?:\/\/(?:www.)?bilibili.com\/(?:video|list)\/.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/(?:video|list)\/.*/.test(pageUrl)
     // anime playback & movie page
-    || /https?:\/\/(?:www.)?bilibili.com\/bangumi\/play\/.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/bangumi\/play\/.*/.test(pageUrl)
     // moment page
     || /https?:\/\/t.bilibili.com.*/.test(location.href)
     // channel, anime, chinese anime, tv shows, movie, variety shows, mooc
-    || /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/(?:v|anime|guochuang|tv|movie|variety|mooc).*/.test(pageUrl)
     // articles page
-    || /https?:\/\/(?:www.)?bilibili.com\/read\/home.*/.test(location.href)
+    || /https?:\/\/(?:www.)?bilibili.com\/read\/home.*/.test(pageUrl)
     // premium page bilibili 大會員頁
     || /https?:\/\/account\.bilibili\.com\/big.*$/.test(location.href)
   ) {
@@ -177,7 +181,7 @@ function closeAllTopBarPopup(exceptionKey?: keyof typeof popupVisible) {
 }
 
 // Channels
-const channels = setupTopBarItemHoverEvent('channels')
+const channels = showChannels ? setupTopBarItemHoverEvent('channels') : ref<HTMLElement>()
 // Avatar
 const avatar = setupTopBarItemHoverEvent('userPanel')
 // Notifications
@@ -426,11 +430,17 @@ async function getUnreadMessageCount() {
   }
 }
 
-const notificationsDrawerUrl = ref<string>('https://message.bilibili.com/')
+const notificationsHomeUrl = localizeBilibiliLink('https://message.bilibili.com/')
+const notificationsDrawerUrl = ref(notificationsHomeUrl)
+function openNotificationsHome() {
+    notificationsDrawerUrl.value = notificationsHomeUrl
+    drawerVisible.notifications = true
+}
+
 function handleNotificationsItemClick(item: { name: string, url: string, unreadCount: number, icon: string }) {
   if (settings.value.openNotificationsPageAsDrawer) {
     drawerVisible.notifications = true
-    notificationsDrawerUrl.value = item.url
+    notificationsDrawerUrl.value = localizeBilibiliLink(item.url)
   }
 }
 // #endregion
@@ -528,7 +538,7 @@ defineExpose({
             z-1 relative w-fit
           >
             <a
-              ref="logo" href="//www.bilibili.com"
+              ref="logo" :href="homeUrl"
               target="_top"
               class="group logo"
               :class="{
@@ -538,7 +548,7 @@ defineExpose({
               rounded="46px" duration-300
               w-46px h-46px transform-gpu
               bg="hover:$bew-theme-color"
-              @click="event => handleClickTopBarItem(event, 'channels')"
+              @click="event => showChannels && handleClickTopBarItem(event, 'channels')"
             >
               <svg
                 t="1720198072316" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -556,7 +566,7 @@ defineExpose({
 
             <Transition name="slide-in">
               <ChannelsPop
-                v-if="popupVisible.channels"
+                v-if="showChannels && popupVisible.channels"
                 class="bew-popover"
                 pos="!left-0 !top-50px"
                 transform="!translate-x-0"
@@ -610,7 +620,7 @@ defineExpose({
               <!-- TODO: need to refactor to this -->
               <!-- <div display="lg:flex none">
               <div v-for="item in topBarItems" :key="item.i18nKey" class="right-side-item">
-                <a :href="item.url" target="_blank" :title="$t(item.i18nKey)">
+                <a :href="localizeBilibiliLink(item.url)" target="_blank" :title="$t(item.i18nKey)">
                   <Icon :icon="item.icon" />
                 </a>
 
@@ -836,12 +846,12 @@ defineExpose({
                   </template>
 
                   <ALink
-                    :href="settings.openNotificationsPageAsDrawer ? undefined : 'https://message.bilibili.com'"
+                    :href="notificationsHomeUrl"
                     :class="{ 'white-icon': forceWhiteIcon }"
                     :title="$t('topbar.notifications')"
                     type="topBar"
                     :custom-click-event="settings.openNotificationsPageAsDrawer"
-                    @click="drawerVisible.notifications = true"
+                    @click="openNotificationsHome"
                   >
                     <div i-tabler:bell />
                   </ALink>

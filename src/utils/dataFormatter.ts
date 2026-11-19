@@ -1,4 +1,3 @@
-import { settings } from '~/logic'
 import { i18n } from '~/utils/i18n'
 
 import { LanguageType } from './../enums/appEnums'
@@ -9,7 +8,7 @@ export function numFormatter(num: number | string): string {
   const digits = 1 // specify number of digits after decimal
   let lookup
 
-  if (settings.value.language === LanguageType.Mandarin_CN) {
+  if (i18n.global.locale.value === LanguageType.Mandarin_CN) {
     lookup = [
       { value: 1, symbol: ' ' },
       { value: 1e4, symbol: ' 万' },
@@ -17,7 +16,7 @@ export function numFormatter(num: number | string): string {
       { value: 1e8, symbol: ' 亿' },
     ]
   }
-  else if (settings.value.language === LanguageType.Cantonese || settings.value.language === LanguageType.Mandarin_TW) {
+  else if (i18n.global.locale.value === LanguageType.Cantonese || i18n.global.locale.value === LanguageType.Mandarin_TW) {
     lookup = [
       { value: 1, symbol: ' ' },
       { value: 1e4, symbol: ' 萬' },
@@ -49,26 +48,18 @@ export function numFormatter(num: number | string): string {
 }
 
 export function calcTimeSince(date: number | string | Date) {
-  const seconds = Math.floor(((Number(new Date())) - Number(date)) / 1000)
-  let interval = seconds / 31536000
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.year', Math.floor(interval))}`
-  interval = seconds / 2592000
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.month', Math.floor(interval))}`
-  interval = seconds / 604800
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.week', Math.floor(interval))}`
-  interval = seconds / 86400
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.day', Math.floor(interval))}`
-  interval = seconds / 3600
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.hour', Math.floor(interval))}`
-  interval = seconds / 60
-  if (interval > 1)
-    return `${Math.floor(interval)} ${t('common.minute', Math.floor(interval))}`
-  return `${Math.floor(interval)} ${t('common.second', Math.floor(interval))}`
+    const seconds = Math.floor((Date.now() - Number(date)) / 1000)
+    if (!Number.isFinite(seconds))
+        return ''
+    const units = [
+        ['year', 31536000], ['month', 2592000], ['week', 604800],
+        ['day', 86400], ['hour', 3600], ['minute', 60], ['second', 1],
+    ] as const
+    const [unit, duration] = units.find(([, value]) => seconds >= value) ?? units[units.length - 1]
+    const count = Math.floor(seconds / duration)
+    if (i18n.global.locale.value === LanguageType.Cantonese)
+        return `${count} ${t(`common.${unit}`, count)}`
+    return new Intl.RelativeTimeFormat(i18n.global.locale.value).format(-count, unit)
 }
 
 export function calcCurrentTime(totalSeconds: number) {

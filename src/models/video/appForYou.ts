@@ -51,6 +51,7 @@ export interface Item {
   bvid?: string
   cover?: string
   title?: string
+    translated_title?: string
   uri?: string
   three_point?: ThreePoint
   player_args?: PlayerArgs

@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { LanguageType } from '~/enums/appEnums'
 import { accessKey, settings } from '~/logic'
 import { getUserID, injectCSS } from '~/utils/main'
+import { getInterfaceLanguage } from '~/utils/page-language'
 
 export function setupNecessarySettingsWatchers() {
   const { locale } = useI18n()
@@ -31,20 +32,14 @@ export function setupNecessarySettingsWatchers() {
         }
       }
 
-      locale.value = settings.value.language
+      locale.value = getInterfaceLanguage(settings.value.language)
 
-      if (locale.value === LanguageType.Mandarin_CN) {
-        document.documentElement.lang = 'zh-CN'
+      const languageTags: Record<string, string> = {
+          [LanguageType.Mandarin_CN]: 'zh-CN',
+          [LanguageType.Mandarin_TW]: 'zh-TW',
+          [LanguageType.Cantonese]: 'zh-HK',
       }
-      else if (locale.value === LanguageType.Mandarin_TW) {
-        document.documentElement.lang = 'zh-TW'
-      }
-      else if (locale.value === LanguageType.Cantonese) {
-        document.documentElement.lang = 'zh-HK'
-      }
-      else {
-        document.documentElement.lang = 'en'
-      }
+      document.getElementById('bewly')?.setAttribute('lang', languageTags[locale.value] || locale.value)
     },
     { immediate: true },
   )

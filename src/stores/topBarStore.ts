@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import type { AppPage } from '~/enums/appEnums'
 import { TopBarPopup } from '~/enums/appEnums'
-import { getUserID } from '~/utils/main'
+import { getUserID, localizeBilibiliLink } from '~/utils/main'
 
 export interface TopBarItem {
   i18nKey: string
@@ -33,28 +33,28 @@ export const useTopBarStore = defineStore('topBar', () => {
       {
         i18nKey: 'topbar.notifications',
         icon: 'tabler:bell',
-        url: 'https://message.bilibili.com',
+        url: localizeBilibiliLink('https://message.bilibili.com/'),
         popup: TopBarPopup.NotificationsPop,
         showPopup: popupVisible.notifications,
       },
       {
         i18nKey: 'topbar.moments',
         icon: 'tabler:windmill',
-        url: 'https://t.bilibili.com',
+        url: localizeBilibiliLink('https://t.bilibili.com/'),
         popup: TopBarPopup.MomentsPop,
         showPopup: popupVisible.moments,
       },
       {
         i18nKey: 'topbar.favorites',
         icon: 'mingcute:star-line',
-        url: `https://space.bilibili.com/${getUserID()}/favlist`,
+        url: localizeBilibiliLink(`https://space.bilibili.com/${getUserID()}/favlist`),
         popup: TopBarPopup.FavoritesPop,
         showPopup: popupVisible.favorites,
       },
       {
         i18nKey: 'topbar.history',
         icon: 'mingcute:time-line',
-        url: 'https://www.bilibili.com/account/history',
+        url: localizeBilibiliLink('https://www.bilibili.com/history'),
         popup: TopBarPopup.HistoryPop,
         showPopup: popupVisible.history,
       },

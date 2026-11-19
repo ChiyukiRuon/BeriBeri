@@ -9,7 +9,7 @@ import type { HistorySearchResult, List as HistorySearchItem } from '~/models/vi
 import { useMainStore } from '~/stores/mainStore'
 import api from '~/utils/api'
 import { calcCurrentTime } from '~/utils/dataFormatter'
-import { getCSRF, removeHttpFromUrl } from '~/utils/main'
+import { getCSRF, localizeBilibiliLink, removeHttpFromUrl } from '~/utils/main'
 
 const { t } = useI18n()
 const { setActivatedCover } = useMainStore()
@@ -378,7 +378,7 @@ function handleMouseEnter(item: HistoryItem) {
             <div flex justify-between w-full h-full>
               <div flex="~ col">
                 <a
-                  :href="`${getHistoryUrl(historyItem)}`" target="_blank"
+                  :href="localizeBilibiliLink(getHistoryUrl(historyItem))" target="_blank"
                   :title="historyItem.show_title ? historyItem.show_title : historyItem.title"
                 >
                   <h3
@@ -400,7 +400,7 @@ function handleMouseEnter(item: HistoryItem) {
                   hover:bg="$bew-theme-color-10"
                   duration-300
                   pr-2
-                  :href="historyItem.author_mid ? `https://space.bilibili.com/${historyItem.author_mid}` : historyItem.uri" target="_blank"
+                  :href="localizeBilibiliLink(historyItem.author_mid ? `https://space.bilibili.com/${historyItem.author_mid}` : historyItem.uri)" target="_blank"
                 >
                   <img
                     :src="

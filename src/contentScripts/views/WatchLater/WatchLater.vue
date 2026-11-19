@@ -8,7 +8,7 @@ import type { List as VideoItem, WatchLaterResult } from '~/models/video/watchLa
 import { useMainStore } from '~/stores/mainStore'
 import api from '~/utils/api'
 import { calcCurrentTime } from '~/utils/dataFormatter'
-import { getCSRF, openLinkToNewTab, removeHttpFromUrl } from '~/utils/main'
+import { getCSRF, localizeBilibiliLink, openLinkToNewTab, removeHttpFromUrl } from '~/utils/main'
 
 const { t } = useI18n()
 const { openIframeDrawer } = useBewlyApp()
@@ -138,7 +138,8 @@ function handlePlayAll() {
   openLinkToNewTab('https://www.bilibili.com/list/watchlater')
 }
 
-function handleLinkClick(url: string) {
+function handleLinkClick(href: string) {
+    const url = localizeBilibiliLink(href)
   if (settings.value.videoCardLinkOpenMode === 'drawer') {
     openIframeDrawer(url) // 在抽屉打开
   }
@@ -266,7 +267,7 @@ function handleMouseEnter(item: VideoItem) {
                     hover:bg="$bew-theme-color-10"
                     duration-300
                     pr-2
-                    :href="`//space.bilibili.com/${item.owner.mid}`" target="_blank"
+                    :href="localizeBilibiliLink(`//space.bilibili.com/${item.owner.mid}`)" target="_blank"
                     @click.stop
                   >
                     <img

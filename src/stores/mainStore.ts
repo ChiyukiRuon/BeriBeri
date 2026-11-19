@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import { HomeSubPage } from '~/contentScripts/views/Home/types'
 import { AppPage } from '~/enums/appEnums'
-import { getUserID, isHomePage } from '~/utils/main'
+import { getUserID, isHomePage, localizeBilibiliLink } from '~/utils/main'
 
 export interface DockItem {
   i18nKey: string
@@ -21,7 +21,7 @@ export interface HomeTab {
 }
 
 export const useMainStore = defineStore('main', () => {
-    const homeUrl = isHomePage() ? location.origin + location.pathname : 'https://www.bilibili.com/'
+    const homeUrl = isHomePage() ? location.origin + location.pathname : localizeBilibiliLink('https://www.bilibili.com/')
   const dockItems = computed((): DockItem[] => {
     return [
       {
@@ -51,7 +51,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.Anime,
         openInNewTab: false,
         useOriginalBiliPage: false,
-        url: 'https://www.bilibili.com/anime',
+        url: localizeBilibiliLink('https://www.bilibili.com/anime'),
         hasBewlyPage: true,
       },
       {
@@ -61,7 +61,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.Favorites,
         openInNewTab: false,
         useOriginalBiliPage: false,
-        url: `https://space.bilibili.com/${getUserID()}/favlist`,
+        url: localizeBilibiliLink(`https://space.bilibili.com/${getUserID()}/favlist`),
         hasBewlyPage: true,
       },
       {
@@ -71,7 +71,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.History,
         openInNewTab: false,
         useOriginalBiliPage: false,
-        url: `https://www.bilibili.com/history`,
+        url: localizeBilibiliLink('https://www.bilibili.com/history'),
         hasBewlyPage: true,
       },
       {
@@ -81,7 +81,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.WatchLater,
         openInNewTab: false,
         useOriginalBiliPage: false,
-        url: `https://www.bilibili.com/watchlater/list`,
+        url: localizeBilibiliLink('https://www.bilibili.com/watchlater/list'),
         hasBewlyPage: true,
       },
       {
@@ -91,7 +91,7 @@ export const useMainStore = defineStore('main', () => {
         page: AppPage.Moments,
         openInNewTab: false,
         useOriginalBiliPage: true,
-        url: `https://t.bilibili.com`,
+        url: localizeBilibiliLink('https://t.bilibili.com/'),
         hasBewlyPage: false,
       },
     ]

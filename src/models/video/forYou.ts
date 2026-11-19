@@ -27,6 +27,7 @@ export interface Item {
   pic: string
   pic_4_3: string
   title: string
+    translated_title?: string
   duration: number
   pubdate: number
   owner: Owner | null

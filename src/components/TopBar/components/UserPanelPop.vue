@@ -7,7 +7,7 @@ import api from '~/utils/api'
 import { revokeAccessKey } from '~/utils/authProvider'
 import { numFormatter } from '~/utils/dataFormatter'
 import { LV0_ICON, LV1_ICON, LV2_ICON, LV3_ICON, LV4_ICON, LV5_ICON, LV6_ICON, LV6_LIGHTNING_ICON } from '~/utils/lvIcons'
-import { getCSRF, getUserID, isHomePage } from '~/utils/main'
+import { getCSRF, getUserID, isHomePage, localizeBilibiliLink } from '~/utils/main'
 
 import type { UserInfo, UserStat } from '../types'
 
@@ -112,18 +112,9 @@ function getLvIcon(level: number, isSigma: boolean = false): string {
 }
 
 function handleClickChannel() {
-  if (settings.value.topBarLinkOpenMode === 'newTab') {
-    window.open(`https://space.bilibili.com/${mid.value}`, '_blank')
-  }
-  else if (settings.value.topBarLinkOpenMode === 'currentTabIfNotHomepage') {
-    if (isHomePage())
-      window.open(`https://space.bilibili.com/${mid.value}`, '_blank')
-    else
-      window.open(`https://space.bilibili.com/${mid.value}`, '_self')
-  }
-  else {
-    window.open(`https://space.bilibili.com/${mid.value}`, '_self')
-  }
+    const mode = settings.value.topBarLinkOpenMode
+    const newTab = mode === 'newTab' || (mode === 'currentTabIfNotHomepage' && isHomePage())
+    window.open(localizeBilibiliLink('https://space.bilibili.com/' + mid.value), newTab ? '_blank' : '_self')
 }
 </script>
 
